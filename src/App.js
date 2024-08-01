@@ -12,8 +12,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
-
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={<Home />} />
+        </Route>
       </Routes>
     </Router>
     </AuthProvider>

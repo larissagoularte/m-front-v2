@@ -1,54 +1,67 @@
-// src/components/Login.js
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
-const apiUrl = process.env.REACT_APP_API_URL;
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
+  const { login } = useAuth();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     try {
-      const response = await fetch(`https://m-back-v2.onrender.com/api/auth/login`, {
+      const response = await fetch('https://m-back-v2.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password })
+        credentials: 'include', 
+        body: JSON.stringify({ username, password }),
       });
-      const data = await response.json();
+
       if (response.ok) {
-        console.log('Login successful', data);
-        setIsAuthenticated(true);
-        navigate('/home');
+        login(); // Update the authentication state
+        navigate('/home'); // Redirect to home using navigate
       } else {
-        setError(data.message || 'Login failed');
+        setError('Invalid username or password');
       }
-    } catch (error) {
-      setError('There was an error logging in!');
-      console.error(error);
+    } catch (err) {
+      console.error('Error logging in:', err);
+      setError('An error occurred. Please try again later.');
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
+    <div className="login-container">
+      <h2>Login</h2>
+      {error && <p className="error">{error}</p>}
+      <form onSubmit={handleLogin}>
+        <div className="form-group">
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
         <button type="submit">Login</button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };
